@@ -1,4 +1,4 @@
-type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export class Api {
     readonly baseUrl: string;
@@ -16,8 +16,12 @@ export class Api {
 
     protected handleResponse<T>(response: Response): Promise<T> {
         if (response.ok) return response.json();
-        else return response.json()
-            .then(data => Promise.reject(data.error ?? response.statusText));
+        return response.json()
+            .then(data => {
+                // Сервер может возвращать ошибку в разных форматах
+                const errorMessage = data.error ?? data.message ?? response.statusText;
+                return Promise.reject(errorMessage);
+            });
     }
 
     get<T extends object>(uri: string) {

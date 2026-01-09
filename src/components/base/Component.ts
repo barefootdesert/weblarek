@@ -1,14 +1,25 @@
-/**
- * Базовый компонент
- */
+// components/base/Component.ts
+
 export abstract class Component<T> {
     protected constructor(protected readonly container: HTMLElement) {
-        // Учитывайте что код в конструкторе исполняется ДО всех объявлений в дочернем классе
     }
 
     // Инструментарий для работы с DOM в дочерних компонентах
 
-    // Установить изображение с альтернативным текстом
+    protected setText(element: HTMLElement, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
+
+    protected setVisible(element: HTMLElement) {
+        element.style.removeProperty('display');
+    }
+
+    protected setHidden(element: HTMLElement) {
+        element.style.display = 'none';
+    }
+
     protected setImage(element: HTMLImageElement, src: string, alt?: string) {
         if (element) {
             element.src = src;
