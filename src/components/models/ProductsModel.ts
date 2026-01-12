@@ -1,34 +1,27 @@
 import { IProduct } from "../../types";
 
 export class ProductsModel {
-  // Все товары каталога
-  private items: IProduct[] = [];
+    protected _items: IProduct[] = [];
+    public selected: IProduct | null = null; // Поле для хранения выбранного товара
 
-  // Выбранный товар для подробного просмотра
-  private selected: IProduct | null = null;
+    // Конструктор теперь не принимает аргументов
+    constructor() {}
 
-  // Сохранить массив товаров
-  setItems(items: IProduct[]): void {
-    this.items = items;
-  }
+    setItems(items: IProduct[]): void {
+        this._items = items;
+    }
 
-  // Получить все товары
-  getItems(): IProduct[] {
-    return this.items;
-  }
+    getItems(): IProduct[] {
+        return this._items;
+    }
 
-  // Получить товар по id
-  getItemById(id: string): IProduct | undefined {
-    return this.items.find((item) => item.id === id);
-  }
+    // Метод поиска товара по ID для тестов в main
+    getProduct(id: string): IProduct | undefined {
+        return this._items.find((item) => item.id === id);
+    }
 
-  // Сохранить выбранный товар
-  setSelected(item: IProduct): void {
-    this.selected = item;
-  }
-
-  // Получить выбранный товар
-  getSelected(): IProduct | null {
-    return this.selected;
-  }
+    // Метод для установки выбранного товара (превью)
+    setSelected(item: IProduct | null): void {
+        this.selected = item;
+    }
 }

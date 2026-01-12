@@ -5,6 +5,7 @@ import { PRODUCT_URL, ORDER_URL } from "../../utils/constants";
 export class LarekApi extends Api {
   readonly cdn: string;
 
+  // Изменяем конструктор, чтобы он принимал только нужные данные
   constructor(cdn: string, baseUrl: string, options?: RequestInit) {
     super(baseUrl, options);
     this.cdn = cdn;

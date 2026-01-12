@@ -1,65 +1,25 @@
-import { IBuyer, TPayment } from "../../types";
+import { IBuyer } from "../../types";
 
 export class BuyerModel {
-  private payment: TPayment | "" = "";
-  private email = "";
-  private phone = "";
-  private address = "";
+    protected _data: Partial<IBuyer> = {};
 
-  // Сохранить данные покупателя(частично или полностью)
-  setData(data: Partial<IBuyer>): void {
-    if (data.payment !== undefined) {
-      this.payment = data.payment;
-    }
-    if (data.email !== undefined) {
-      this.email = data.email;
-    }
-    if (data.phone !== undefined) {
-      this.phone = data.phone;
-    }
-    if (data.address !== undefined) {
-      this.address = data.address;
-    }
-  }
+    constructor() {} // Убрали IEvents
 
-  // Получить данные покупателя
-  getData(): IBuyer {
-    return {
-      payment: this.payment as TPayment,
-      email: this.email,
-      phone: this.phone,
-      address: this.address,
-    };
-  }
-
-  // Очистить данные покупателя
-  clear(): void {
-    this.payment = "";
-    this.email = "";
-    this.phone = "";
-    this.address = "";
-  }
-
-  // Валидация данных покупателя
-  validate(): Partial<Record<keyof IBuyer, string>> {
-    const errors: Partial<Record<keyof IBuyer, string>> = {};
-
-    if (!this.payment) {
-      errors.payment = "Не выбран способ оплаты";
+    setData(data: Partial<IBuyer>): void {
+        this._data = { ...this._data, ...data };
     }
 
-    if (!this.address) {
-      errors.address = "Введите адрес доставки";
+    getData(): Partial<IBuyer> {
+        return this._data;
     }
 
-    if (!this.email) {
-      errors.email = "Введите email";
+    // Пример простой валидации для тестов
+    validate(): Record<string, string> | true {
+        const errors: Record<string, string> = {};
+        if (!this._data.email) errors.email = "Необходим email";
+        if (!this._data.phone) errors.phone = "Необходим телефон";
+        if (!this._data.address) errors.address = "Необходим адрес";
+        
+        return Object.keys(errors).length === 0 ? true : errors;
     }
-
-    if (!this.phone) {
-      errors.phone = "Введите телефон";
-    }
-
-    return errors;
-  }
 }
