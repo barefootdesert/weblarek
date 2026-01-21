@@ -24,4 +24,9 @@ export class ProductsModel {
     setSelected(item: IProduct | null): void {
         this.selected = item;
     }
+
+    // Метод для получения текущего выбранного товара
+    getSelected(): IProduct | null {
+        return this.selected;
+    }
 }
