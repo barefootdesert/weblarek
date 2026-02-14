@@ -14,28 +14,25 @@ export class Api {
         };
     }
 
-    protected handleResponse<T>(response: Response): Promise<T> {
+    protected handleResponse(response: Response): Promise<object> {
         if (response.ok) return response.json();
-        return response.json()
-            .then(data => {
-                // Сервер может возвращать ошибку в разных форматах
-                const errorMessage = data.error ?? data.message ?? response.statusText;
-                return Promise.reject(errorMessage);
-            });
+        else return response.json()
+            .then(data => Promise.reject(data.error ?? response.statusText));
     }
 
-    get<T extends object>(uri: string) {
+    get(uri: string) {
         return fetch(this.baseUrl + uri, {
             ...this.options,
-            method: 'GET'
-        }).then(this.handleResponse<T>);
+            method: 'GET',
+					cache: 'no-store'
+        }).then(this.handleResponse);
     }
 
-    post<T extends object>(uri: string, data: object, method: ApiPostMethods = 'POST') {
+    post(uri: string, data: object, method: ApiPostMethods = 'POST') {
         return fetch(this.baseUrl + uri, {
             ...this.options,
             method,
             body: JSON.stringify(data)
-        }).then(this.handleResponse<T>);
+        }).then(this.handleResponse);
     }
 }

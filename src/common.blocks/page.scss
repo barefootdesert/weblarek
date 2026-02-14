@@ -10,8 +10,13 @@ html, body.page {
 
 .page__wrapper {
 	width: 100%;
+
+	&_locked {
+		position: fixed;
+	}
+
+	.no-scroll {
+		overflow: hidden;
+	}
 }
 
-.page:has(.modal_active) {
-	overflow: hidden;
-}
