@@ -1,46 +1,43 @@
-import { Form } from '../common/Form';
-import { ensureElement } from '../../utils/utils';
-import { IEvents } from '../base/Events';
+import { IBuyer } from "../../types";
+import { ensureAllElements } from "../../utils/utils";
+import { IEvents } from "../base/Events";
+import { Form, TForm } from "./Form";
 
-interface IContactsOrder {
-	email: string;
-	phone: string;
-}
+type TFormContacts = TForm & Pick<IBuyer, 'email' | 'phone'>;
 
-export class FormContacts extends Form<IContactsOrder> {
-	protected email: HTMLInputElement;
-	protected phone: HTMLInputElement;
-	protected button: HTMLButtonElement;
-	protected errorSpan: HTMLSpanElement;
+export class FormContacts extends Form<TFormContacts> {
+  protected titleLabelElement: HTMLSpanElement[];
+  protected inputElements: HTMLInputElement[];
 
-	constructor(container: HTMLFormElement, protected events: IEvents) {
-		super(container, events);
+  constructor(container: HTMLElement, protected events: IEvents) {
+    super(container, events);
 
-		this.form = container;
+    this.titleLabelElement = ensureAllElements<HTMLSpanElement>('.form__label', this.container);
+    this.inputElements = ensureAllElements<HTMLInputElement>('.form__input', this.container);
 
-		this.email = ensureElement<HTMLInputElement>('input[name="email"]',container);
-		this.phone = ensureElement<HTMLInputElement>('input[name="phone"]', container);
-		this.button = ensureElement<HTMLButtonElement>('.button', container);
-		this.errorSpan = ensureElement<HTMLSpanElement>('.form__errors', container);
+    
+    this.inputElements.forEach((input) => {
+      input.addEventListener('input', (event) => {
+        event.preventDefault();
+        console.log('Input change:', input.name, input.value);
+        
+        const data: { email?: string; phone?: string } = {};
+        if (input.name === 'email') data.email = input.value;
+        if (input.name === 'phone') data.phone = input.value;
+        
+        this.events?.emit('contacts:input:change', data);
+      });
+    });
 
-		this.button.addEventListener('click', (e) => {
-			e.preventDefault();
-			this.events.emit('form-contacts:send-order');
-		})
+  }
 
-		this.form.addEventListener('input', (e: Event) => {
-			const target = e.target as HTMLInputElement;
-			const field = target.name as keyof IContactsOrder;
-			const value = target.value;
-			this.onInputChange(field as keyof IContactsOrder, value);
-		});
-	}
+  set email(value: string) {
+    const emailInput = this.inputElements.find(input => input.name === 'email');
+    if (emailInput) emailInput.value = value;
+  }
 
-	protected onInputChange(field: keyof IContactsOrder, value: string) {
-		this.events.emit(`${this.form.name}.${String(field)}:change`, {
-			field,
-			value,
-			formType: 'contacts'
-		});
-	};
+  set phone(value: string) {
+    const phoneInput = this.inputElements.find(input => input.name === 'phone');
+    if (phoneInput) phoneInput.value = value;
+  }
 }

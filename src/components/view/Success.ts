@@ -1,29 +1,28 @@
-import { ensureElement } from '../../utils/utils';
-import { IEvents } from '../base/Events';
-import { Component } from '../base/Component';
+import { IProduct } from "../../types";
+import { ensureElement } from "../../utils/utils";
+import { Component } from "../base/Component";
+import { IEvents } from "../base/Events";
 
-interface ISuccess {
-	totalPrice: number;
-}
+type TOrderSuccess = Pick<IProduct, 'price'>;
 
-export  class Success extends Component<ISuccess>{
+export class OrderSuccess extends Component<TOrderSuccess> {
+  protected titleElement: HTMLElement;
+  protected priceElement: HTMLElement;
+  protected successButton: HTMLButtonElement;
 
-	protected description: HTMLParagraphElement;
-	protected button: HTMLButtonElement;
+  constructor(container: HTMLElement, protected events: IEvents) {
+    super(container);
 
-	constructor(container: HTMLElement, protected events: IEvents) {
-		super(container);
+    this.titleElement = ensureElement<HTMLElement>('.order-success__title', this.container);
+    this.priceElement = ensureElement<HTMLElement>('.order-success__description', this.container);
+    this.successButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
 
-		this.description = ensureElement<HTMLParagraphElement>('.order-success__description', container)
-		this.button = ensureElement<HTMLButtonElement>('.order-success__close', container)
+    this.successButton.addEventListener('click', () => {
+      this.events.emit('success:close');
+    });
+  }
 
-		this.button.addEventListener('click', (e) => {
-			e.preventDefault();
-			this.events.emit('success:close');
-		})
-	};
-
-	protected set totalPrice(value: number) {
-		this.setText(this.description, `Списано ${value} синапсов`);
-	};
+  set price(value: string) {
+    this.priceElement.textContent = value;
+  }
 }

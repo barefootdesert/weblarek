@@ -1,24 +1,27 @@
-import { Card } from './Card';
-import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
+import { ICardActions } from "../../types";
+import { ensureElement } from "../../utils/utils";
+import { TCard, Card } from "./Card";
 
-export class CardBasket extends Card  {
+type TCardBasket = TCard & {
+  index: number
+}
 
-	protected indexCard: HTMLElement;
-	protected deleteButton: HTMLButtonElement;
+export class CardBasket extends Card<TCardBasket> {
+  protected indexElement: HTMLElement;
+  protected buttonElement: HTMLButtonElement;
 
-	constructor(container: HTMLElement, events: IEvents) {
-		super(container, events);
+  constructor(container: HTMLElement, actions?: ICardActions) {
+    super(container);
 
-		this.indexCard = ensureElement<HTMLElement>('.basket__item-index', container)
-		this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', container);
+    this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
+    this.buttonElement = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
-		this.deleteButton.addEventListener('click', () => {
-			this.events.emit('basket-card:delete',  { id: this.id });
-		})
-	}
+    if (actions?.onClick) {
+      this.buttonElement.addEventListener('click', actions.onClick);
+    }
+  }
 
-	protected set index(value: number) {
-		this.setText(this.indexCard, value);
-	};
+  set index(value: number) {
+    this.setText(this.indexElement, String(value));
+  }
 }

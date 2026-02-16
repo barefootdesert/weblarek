@@ -1,32 +1,27 @@
-import { Component } from '../base/Component';
-import { IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
+import { ensureElement } from "../../utils/utils";
+import { Component } from "../base/Component";
+import { IEvents } from "../base/Events";
 
-export interface IHeaderData {
-	counter: number;
+interface IHeader {
+  counter: number
 }
 
-export class Header extends Component<IHeaderData> {
-	protected basketButton: HTMLButtonElement;
-	protected counterElement: HTMLElement;
-	protected wrapper: HTMLElement;
+export class Header extends Component<IHeader> {
+  protected basketButton: HTMLButtonElement;
+  protected counterElement: HTMLElement;
 
-	constructor(container: HTMLElement, protected events: IEvents) {
-		super(container);
-		this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', container);
-		this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', container);
-		this.wrapper = ensureElement<HTMLElement>('.page__wrapper');
-		this.basketButton.addEventListener('click', () => {
-			events.emit('basket:open');
-		});
-	};
+  constructor(protected events: IEvents, container: HTMLElement) {
+    super(container);
 
-	protected set counter(value: number) {
-		this.setText(this.counterElement, value);
-		this.events.emit('basket:update');
-	};
+    this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
+    this.counterElement = ensureElement<HTMLElement>('.header__basket-counter', this.container);
 
-	set locked(value: boolean) {
-		this.toggleClass(this.wrapper, 'page__wrapper_locked', value);
-	};
+    this.basketButton.addEventListener('click', () => {
+      this.events.emit('basket:open');
+    });
+  }
+
+  set counter(value: number) {
+    this.counterElement.textContent = String(value);
+  }
 }

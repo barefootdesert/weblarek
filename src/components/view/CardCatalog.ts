@@ -1,33 +1,37 @@
-import { Card } from './Card';
-import {IEvents } from '../base/Events';
-import { ensureElement } from '../../utils/utils';
-import { categoryClasses } from '../../utils/constants';
+import { ICardActions, IProduct } from "../../types";
+import { categoryMap, CDN_URL } from "../../utils/constants";
+import { ensureElement } from "../../utils/utils";
+import { TCard, Card } from "./Card";
 
-export class CardCatalog extends Card {
-	protected imageCard: HTMLImageElement;
-	protected categoryCard: HTMLElement;
-	protected id: string;
+type CategoryKey = keyof typeof categoryMap;
 
-	constructor(container: HTMLElement, protected events: IEvents) {
-		super(container, events);
-		this.events = events;
+type TCardCatalog = TCard & Pick<IProduct, 'image' | 'category' | 'title' | 'price'>;
 
-		this.imageCard = ensureElement<HTMLImageElement>('.card__image', container);
-		this.categoryCard = ensureElement<HTMLImageElement>('.card__category', container);
+export class CardCatalog extends Card<TCardCatalog> {
+  protected categoryElement: HTMLElement;
+  protected imageElement: HTMLImageElement;
+  
+  constructor(container: HTMLElement, actions?: ICardActions) {
+    super(container);
 
-		this.container.addEventListener('click', () => {
-			if (this.id) {
-				this.events.emit('product:select', { id: this.id });
-			}
-		});
-	}
+    this.categoryElement = ensureElement<HTMLElement>('.card__category', this.container);
+    this.imageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
 
-	protected set image(value: string){
-		this.setImage(this.imageCard, value)
-	};
+    if (actions?.onClick) {
+      this.container.addEventListener('click', actions.onClick);
+    }
+  }
 
-	protected set category(value: string) {
-		this.setText(this.categoryCard, value);
-		this.categoryCard.className = `card__category ${categoryClasses[value] ?? ''}`
-	};
+  set category(value: string) {
+    this.categoryElement.textContent = value;
+
+    for (const key in categoryMap) {
+      this.categoryElement.classList.toggle(categoryMap[key as CategoryKey], key === value);
+    }
+  }
+
+  set image(value: string) {
+    const fullImageUrl = `${CDN_URL}${value}`;
+    this.setImage(this.imageElement, fullImageUrl, this.title);
+  }
 }

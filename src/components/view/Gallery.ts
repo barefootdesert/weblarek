@@ -1,17 +1,24 @@
-import { Component } from '../base/Component';
-import { IEvents } from '../base/Events';
+import { ensureElement } from "../../utils/utils";
+import { Component } from "../base/Component";
+import { IEvents } from "../base/Events";
 
-export interface IGalleryData {
-		container: HTMLElement
-	catalogCard: HTMLElement[]
+interface IGallery {
+  catalog: HTMLElement[]
 }
-export class Gallery extends Component<IGalleryData> {
 
-	constructor(container: HTMLElement, protected events: IEvents) {
-		super(container);
-	}
+export class Gallery extends Component<IGallery> {
+  protected catalogElement: HTMLElement;
 
-	protected set catalogCard (items: HTMLElement[]) {
-		this.container.append(...items);
-	}
+  constructor(container: HTMLElement, protected events?: IEvents) {
+    super(container);
+
+    this.catalogElement = ensureElement<HTMLElement>('.gallery', this.container);
+  }
+
+  set catalog(items: HTMLElement[]) {
+    this.catalogElement.innerHTML = '';
+    items.forEach(item => {
+      this.catalogElement.appendChild(item);
+    });
+  }
 }
