@@ -8,8 +8,6 @@
 
 *   **Язык:** HTML, SCSS, TypeScript
     
-*   **Сборщик:** Webpack
-    
 *   **Архитектурный паттерн:** MVP (Model-View-Presenter)
     
 
@@ -90,12 +88,8 @@
 *   **FormOrder.ts**: Первый этап оформления (способ оплаты и адрес).
     
 *   **FormContacts.ts**: Второй этап (email и телефон).
-    
 
-Основные события
-----------------
 
-**СобытиеИсточникОписание**products:changedProductCatalog.tsКаталог обновлен, нужно перерисовать галереюcard:selectCardCatalog.tsКлик по карточке — открыть предпросмотрbasket:openHeader.tsНажата иконка корзиныorder:openBasketView.tsПереход к оформлению заказаorder:payment:changeFormOrder.tsСмена способа оплатыorder:form:submitFormOrder.tsПереход к вводу контактных данныхcontacts:form:submitFormContacts.tsФинальная отправка заказа на сервер
 
 Основной процесс (Flow)
 -----------------------
