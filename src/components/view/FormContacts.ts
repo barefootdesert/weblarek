@@ -25,7 +25,7 @@ export class FormContacts extends Form<TFormContacts> {
         if (input.name === 'email') data.email = input.value;
         if (input.name === 'phone') data.phone = input.value;
         
-        this.events?.emit('contacts:input:change', data);
+        this.events.emit('contacts:input:change', data);
       });
     });
 

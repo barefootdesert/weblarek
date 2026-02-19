@@ -1,84 +1,70 @@
-import { IProduct } from '../../types/index.ts'
-import { IEvents } from '../base/Events.ts';
+import { IProduct } from '../../types/index';
+import { IEvents } from '../base/Events';
 
 export class Basket {
-  arrayProducts: IProduct[];
+    private products: IProduct[] = [];
 
-  constructor(selectedProducts: IProduct[] = [], protected events: IEvents) {
-    this.arrayProducts = selectedProducts;
-    
-    this.events.emit('basket:initialized', {
-      products: this.getArrayBasket(),
-      totalPrice: this.getTotalPrice(),
-      itemsCount: this.getItemsCount()
-    });
-  }
-
-  getArrayBasket(): IProduct[] {
-    return [...this.arrayProducts];
-  }
-
-  addProduct(product: IProduct): IProduct[] {
-    const oldProducts = this.getArrayBasket();
-    this.arrayProducts = this.arrayProducts.concat(product);
-    
-    this.events.emit('basket:product:added', {
-      product,
-      products: this.getArrayBasket(),
-      totalPrice: this.getTotalPrice(),
-      itemsCount: this.getItemsCount(),
-      oldProducts
-    });
-
-    return this.arrayProducts;
-  }
-
-  delProduct(id: string): IProduct[] {
-    const oldProducts = this.getArrayBasket();
-    const removedProduct = this.arrayProducts.find(item => item.id === id);
-    
-    this.arrayProducts = this.arrayProducts.filter(item => item.id !== id);
-    
-    if (removedProduct) {
-      this.events.emit('basket:product:removed', {
-        product: removedProduct,
-        productId: id,
-        products: this.getArrayBasket(),
-        totalPrice: this.getTotalPrice(),
-        itemsCount: this.getItemsCount(),
-        oldProducts
-      });
+    constructor(protected events: IEvents) {
     }
 
-    return this.arrayProducts;
-  }
-  
-  clearBasket(): void {
-    const oldProducts = this.getArrayBasket();
-    
-    this.arrayProducts = [];
+    getArrayBasket(): IProduct[] {
+        return [...this.products];
+    }
 
-    this.events.emit('basket:cleared', {
-      oldProducts,
-      products: this.getArrayBasket(),
-      totalPrice: this.getTotalPrice(),
-      itemsCount: this.getItemsCount()
-    });
-  }
+    addProduct(product: IProduct): void {
+        const oldProducts = this.getArrayBasket();
+        this.products.push(product);
 
-  getTotalPrice(): number | null {
-    const total = this.arrayProducts.reduce((total, product) => {
-      return total + (product.price ?? 0);
-    }, 0);
-    
-    return total;
-  }
+        this.events.emit('basket:product:added', {
+            product,
+            products: this.getArrayBasket(),
+            totalPrice: this.getTotalPrice(),
+            itemsCount: this.getItemsCount(),
+            oldProducts
+        });
+    }
 
-  getItemsCount(): number {
-    return this.arrayProducts.length;
-  }
+    delProduct(id: string): void {
+        const oldProducts = this.getArrayBasket();
+        const removedProduct = this.products.find(item => item.id === id);
 
-  hasProduct(id: string): boolean {
-    return this.arrayProducts.some(item => item.id === id);
-  }
+        this.products = this.products.filter(item => item.id !== id);
+
+        if (removedProduct) {
+            this.events.emit('basket:product:removed', {
+                product: removedProduct,
+                productId: id,
+                products: this.getArrayBasket(),
+                totalPrice: this.getTotalPrice(),
+                itemsCount: this.getItemsCount(),
+                oldProducts
+            });
+        }
+    }
+
+    clearBasket(): void {
+        const oldProducts = this.getArrayBasket();
+        this.products = [];
+
+        this.events.emit('basket:cleared', {
+            oldProducts,
+            products: this.getArrayBasket(),
+            totalPrice: this.getTotalPrice(),
+            itemsCount: this.getItemsCount()
+        });
+    }
+
+    getTotalPrice(): number {
+        return this.products.reduce((total, product) => {
+            return total + (product.price ?? 0);
+        }, 0);
+    }
+
+    getItemsCount(): number {
+        return this.products.length;
+    }
+
+    hasProduct(id: string): boolean {
+        return this.products.some(item => item.id === id);
+    }
 }

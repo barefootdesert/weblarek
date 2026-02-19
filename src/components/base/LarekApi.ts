@@ -1,18 +1,22 @@
-import { IApi } from '../../types/index'
-import { ApiPostMethods } from '../../types/index'
+import { IApi } from '../../types/index';
+import { IProductResponse, IOrderRequest, IOrderResponse } from '../../types/index';
 
-export class ApiComposition implements IApi {
+export class ApiComposition {
     private instanceApi: IApi;
 
     constructor(instanceApi: IApi) {
         this.instanceApi = instanceApi;
     }
 
-    get<T extends object>(uri: string): Promise<T> {
-        return this.instanceApi.get<T>(uri);
+    getProducts(): Promise<IProductResponse> {
+        return this.instanceApi.get<IProductResponse>('products.json');
     }
 
-    post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T> {
-        return this.instanceApi.post<T>(uri, data, method);
+    postOrder(order: IOrderRequest): Promise<IOrderResponse> {
+        if (import.meta.env.MODE === 'development') {
+            console.log('Мок: Заказ отправлен', order);
+            return Promise.resolve({ total: order.total, id: 'mock-order-id' });  
+        }
+        return this.instanceApi.post<IOrderResponse>('/order', order);
     }
 }

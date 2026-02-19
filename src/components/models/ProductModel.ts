@@ -1,58 +1,29 @@
-import { IProduct } from '../../types/index.ts'
-import { IEvents } from '../base/Events.ts';
+import { IProduct } from '../../types/index';
+import { IEvents } from '../base/Events';
 
 export class ProductCatalog {
-  arrayProducts: IProduct[];
-  cardProduct!: IProduct;
+    private arrayProducts: IProduct[] = [];
+    private selectedProduct?: IProduct;
 
-  constructor(initialProducts: IProduct[], protected events: IEvents) {
-    this.events = events;
-    this.arrayProducts = initialProducts;
-  }
-
-  setArrayProducts(arrayProducts: IProduct[]): void {
-    const oldProducts = [...this.arrayProducts];
-    this.arrayProducts = [...arrayProducts];
-    
-    this.events?.emit('products:changed', {
-      oldProducts,
-      newProducts: this.arrayProducts,
-      action: 'replace'
-    });
-  }
-
-  getArrayProducts(): IProduct[] {
-    return [...this.arrayProducts];
-  }
-
-  getProduct(id: string): IProduct {
-    const product = this.arrayProducts.find(item => item.id === id);
-    
-    if (!product) {
-      throw new Error(`Товар с ID ${id} не найден`);
+    constructor(initialProducts: IProduct[] = [], protected events: IEvents) {
+        this.setArrayProducts(initialProducts);
     }
 
-    return {
-      id: product.id,
-      description: product.description,
-      image: product.image,
-      title: product.title,
-      category: product.category,
-      price: product.price
-    };
-  }
+    setArrayProducts(arrayProducts: IProduct[]): void {
+        this.arrayProducts = [...arrayProducts];
+        this.events.emit('products:changed');
+    }
 
-  setProductForDisplay(cardProduct: IProduct): void {
-    const oldProduct = this.cardProduct ? { ...this.cardProduct } : undefined;
-    this.cardProduct = { ...cardProduct };
-    
-    this.events.emit('product:display:changed', {
-      oldProduct,
-      newProduct: this.cardProduct
-    });
-  }
+    getArrayProducts(): IProduct[] {
+        return [...this.arrayProducts];
+    }
 
-  getProductForDisplay(): IProduct { 
-    return this.cardProduct; 
-  }
+    setSelectedProduct(product: IProduct): void {
+        this.selectedProduct = { ...product };
+        this.events.emit('product:selected', this.selectedProduct);
+    }
+
+    getSelectedProduct(): IProduct | undefined {
+        return this.selectedProduct ? { ...this.selectedProduct } : undefined;
+    }
 }

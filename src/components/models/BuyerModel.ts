@@ -1,109 +1,67 @@
-import { IBuyer } from '../../types/index.ts'
-import { IEvents } from '../base/Events.ts';
+import { IBuyer } from '../../types/index';
+import { IEvents } from '../base/Events';
 
-export class Buyer implements IBuyer {
-  payment: 'card' | 'cash' | '';
-  email: string;
-  phone: string;
-  address: string;
+export class Buyer {
+    private payment: 'card' | 'cash' | '' = '';
+    private email: string = '';
+    private phone: string = '';
+    private address: string = '';
 
-  constructor(buyerData: IBuyer, protected events: IEvents) {
-    this.payment = buyerData.payment;
-    this.email = buyerData.email;
-    this.phone = buyerData.phone;
-    this.address = buyerData.address;
-    
-    this.events.emit('buyer:initialized', {
-      buyerData: this.getBuyerData()
-    });
-  }
-
-  saveOrderData(buyerData: IBuyer): void {
-    const oldData = this.getBuyerData();
-    
-    this.payment = buyerData.payment;
-    this.email = buyerData.email || '';
-    this.phone = buyerData.phone || '';
-    this.address = buyerData.address;
-
-    this.events.emit('buyer:data:saved', {
-      oldData,
-      newData: this.getBuyerData(),
-      changes: this.getChangedFields(oldData, buyerData)
-    });
-  }
-
-  getBuyerData(): IBuyer {
-    return {
-      payment: this.payment,
-      email: this.email,
-      phone: this.phone,
-      address: this.address
+    constructor(initialData: IBuyer, protected events: IEvents) {
+        this.saveOrderData(initialData);
     }
-  }
 
-  clearBuyerData(): void {
-    const oldData = this.getBuyerData();
-    
-    this.payment = '';
-    this.email = '';
-    this.phone = '';
-    this.address = '';
+    /**
+     * Обновление данных покупателя (можно передавать только изменённые поля)
+     */
+    saveOrderData(data: Partial<IBuyer>): void {
+        if (data.payment !== undefined) this.payment = data.payment;
+        if (data.email !== undefined) this.email = data.email;
+        if (data.phone !== undefined) this.phone = data.phone;
+        if (data.address !== undefined) this.address = data.address;
 
-    this.events.emit('buyer:data:cleared', {
-      oldData,
-      newData: this.getBuyerData()
-    });
-  }
+        this.events.emit('buyer:data:saved', {
+            newData: this.getBuyerData()
+        });
+    }
 
-   validateOrder(): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    
-    if (!this.payment) errors.push('Выберите способ оплаты');
-    if (!this.address?.trim()) errors.push('Введите адрес доставки');
-    
-    const isValid = errors.length === 0;
-    
-    this.events.emit('buyer:validation:checked:order', {
-      isValid,
-      buyerData: this.getBuyerData(),
-      validationDetails: {
-        hasPayment: !!this.payment,
-        hasAddress: !!this.address.trim()
-      }
-    });
-    
-    return { isValid, errors };
-  }
+    getBuyerData(): IBuyer {
+        return {
+            payment: this.payment,
+            email: this.email,
+            phone: this.phone,
+            address: this.address
+        };
+    }
 
-   validateContacts(): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    
-    if (!this.email?.trim()) errors.push('Введите email');
-    if (!this.phone?.trim()) errors.push('Введите телефон');
-    
-    const isValid = errors.length === 0;
-    
-    this.events.emit('buyer:validation:checked:contacts', {
-      isValid,
-      buyerData: this.getBuyerData(),
-      validationDetails: {
-        hasEmail: !!this.email.trim(),
-        hasPhone: !!this.phone.trim()
-      }
-    });
-    
-    return { isValid, errors };
-  }
+    clearBuyerData(): void {
+        this.payment = '';
+        this.email = '';
+        this.phone = '';
+        this.address = '';
 
-  private getChangedFields(oldData: IBuyer, newData: IBuyer): string[] {
-      const changedFields: string[] = [];
-      
-      if (oldData.payment !== newData.payment) changedFields.push('payment');
-      if (oldData.email !== newData.email) changedFields.push('email');
-      if (oldData.phone !== newData.phone) changedFields.push('phone');
-      if (oldData.address !== newData.address) changedFields.push('address');
-      
-      return changedFields;
-  }
+        this.events.emit('buyer:data:cleared', {
+            newData: this.getBuyerData()
+        });
+    }
+
+    validateOrder(): { isValid: boolean; errors: string[] } {
+        const errors: string[] = [];
+        
+        if (!this.payment) errors.push('Выберите способ оплаты');
+        if (!this.address?.trim()) errors.push('Введите адрес доставки');
+        
+        const isValid = errors.length === 0;
+        return { isValid, errors };
+    }
+
+    validateContacts(): { isValid: boolean; errors: string[] } {
+        const errors: string[] = [];
+        
+        if (!this.email?.trim()) errors.push('Введите email');
+        if (!this.phone?.trim()) errors.push('Введите телефон');
+        
+        const isValid = errors.length === 0;
+        return { isValid, errors };
+    }
 }
