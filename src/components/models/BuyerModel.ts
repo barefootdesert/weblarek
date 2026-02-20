@@ -7,13 +7,8 @@ export class Buyer {
     private phone: string = '';
     private address: string = '';
 
-    constructor(initialData: IBuyer, protected events: IEvents) {
-        this.saveOrderData(initialData);
-    }
+    constructor(protected events: IEvents) {}
 
-    /**
-     * Обновление данных покупателя (можно передавать только изменённые поля)
-     */
     saveOrderData(data: Partial<IBuyer>): void {
         if (data.payment !== undefined) this.payment = data.payment;
         if (data.email !== undefined) this.email = data.email;
@@ -45,23 +40,17 @@ export class Buyer {
         });
     }
 
-    validateOrder(): { isValid: boolean; errors: string[] } {
-        const errors: string[] = [];
-        
-        if (!this.payment) errors.push('Выберите способ оплаты');
-        if (!this.address?.trim()) errors.push('Введите адрес доставки');
-        
-        const isValid = errors.length === 0;
-        return { isValid, errors };
-    }
+    /**
+     * Универсальный метод validate() — обязательный по ревью
+     */
+    validate(): Partial<Record<keyof IBuyer, string>> {
+        const errors: Partial<Record<keyof IBuyer, string>> = {};
 
-    validateContacts(): { isValid: boolean; errors: string[] } {
-        const errors: string[] = [];
-        
-        if (!this.email?.trim()) errors.push('Введите email');
-        if (!this.phone?.trim()) errors.push('Введите телефон');
-        
-        const isValid = errors.length === 0;
-        return { isValid, errors };
+        if (!this.payment) errors.payment = 'Выберите способ оплаты';
+        if (!this.address?.trim()) errors.address = 'Введите адрес доставки';
+        if (!this.email?.trim()) errors.email = 'Введите email';
+        if (!this.phone?.trim()) errors.phone = 'Введите телефон';
+
+        return errors;
     }
 }

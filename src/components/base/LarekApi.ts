@@ -13,10 +13,6 @@ export class ApiComposition {
     }
 
     postOrder(order: IOrderRequest): Promise<IOrderResponse> {
-        if (import.meta.env.MODE === 'development') {
-            console.log('Мок: Заказ отправлен', order);
-            return Promise.resolve({ total: order.total, id: 'mock-order-id' });  
-        }
         return this.instanceApi.post<IOrderResponse>('/order', order);
     }
 }

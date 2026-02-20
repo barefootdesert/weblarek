@@ -5,9 +5,7 @@ export class ProductCatalog {
     private arrayProducts: IProduct[] = [];
     private selectedProduct?: IProduct;
 
-    constructor(initialProducts: IProduct[] = [], protected events: IEvents) {
-        this.setArrayProducts(initialProducts);
-    }
+    constructor(protected events: IEvents) {}
 
     setArrayProducts(arrayProducts: IProduct[]): void {
         this.arrayProducts = [...arrayProducts];
