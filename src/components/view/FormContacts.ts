@@ -6,16 +6,15 @@ import { Form, TForm } from "./Form";
 type TFormContacts = TForm & Pick<IBuyer, 'email' | 'phone'>;
 
 export class FormContacts extends Form<TFormContacts> {
-    protected titleLabelElement: HTMLSpanElement[];
     protected inputElements: HTMLInputElement[];
 
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container, events);
 
-        this.titleLabelElement = ensureAllElements<HTMLSpanElement>('.form__label', this.container);
         this.inputElements = ensureAllElements<HTMLInputElement>('.form__input', this.container);
 
-        this.inputElements.forEach((input) => {
+        // Один обработчик на все input
+        this.inputElements.forEach(input => {
             input.addEventListener('input', () => {
                 this.events.emit('contacts:input:change', {
                     [input.name]: input.value
@@ -25,12 +24,12 @@ export class FormContacts extends Form<TFormContacts> {
     }
 
     set email(value: string) {
-        const emailInput = this.inputElements.find(input => input.name === 'email');
-        if (emailInput) emailInput.value = value;
+        const emailInput = this.inputElements.find(i => i.name === 'email');
+        if (emailInput) emailInput.value = value || '';
     }
 
     set phone(value: string) {
-        const phoneInput = this.inputElements.find(input => input.name === 'phone');
-        if (phoneInput) phoneInput.value = value;
+        const phoneInput = this.inputElements.find(i => i.name === 'phone');
+        if (phoneInput) phoneInput.value = value || '';
     }
 }
