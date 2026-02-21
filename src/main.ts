@@ -35,9 +35,8 @@ const templates = {
     contacts: ensureElement<HTMLTemplateElement>('#contacts')
 };
 
-// ==================== ГЛОБАЛЬНЫЕ ЭКЗЕМПЛЯРЫ ====================
 const larekApi = new ApiComposition(new Api(API_URL));
-const productCatalog = new ProductCatalog(events);
+const productCatalog = new ProductCatalog(events); 
 const basketModel = new Basket(events);
 const buyerModel = new Buyer(events);
 
@@ -50,6 +49,7 @@ const orderForm = new FormOrder(cloneTemplate(templates.order), events);
 const contactsForm = new FormContacts(cloneTemplate(templates.contacts), events);
 const successView = new OrderSuccess(cloneTemplate(templates.success), events);
 
+// CardPreview — один экземпляр на всё приложение
 const previewCard = new CardPreview(cloneTemplate(templates.preview), {
     onClick: () => events.emit('preview:button:click')
 });
@@ -98,7 +98,7 @@ events.on('products:changed', () => {
 
 // ==================== ПРЕВЬЮ ====================
 events.on('card:click', (item: IProduct) => {
-    productCatalog.setSelectedProduct(item);
+    productCatalog.setSelectedProduct(item);   // только модель!
 });
 
 events.on('product:selected', (item: IProduct) => {
@@ -118,11 +118,13 @@ events.on('preview:button:click', () => {
     } else {
         basketModel.addProduct(currentItem);
     }
-    modal.close();
+    modal.close();   // прямой вызов, без события
 });
 
 // ==================== КОРЗИНА ====================
-events.on('basket:item:delete', (item: IProduct) => basketModel.delProduct(item.id));
+events.on('basket:item:delete', (item: IProduct) => {
+    basketModel.delProduct(item.id);
+});
 
 events.on('basket:product:added', updateUI);
 events.on('basket:product:removed', updateUI);
@@ -132,21 +134,18 @@ events.on('basket:open', () => {
     modal.openWithContent(basketView.render());
 });
 
-// ==================== ФОРМЫ ====================
+// ==================== ФОРМЫ (ИСПРАВЛЕНО ПО РЕВЬЮ) ====================
 
+// Ревьюер: Обработчики открытия форм должны только отрендерить формы.
 events.on('order:open', () => {
-    if (basketModel.getItemsCount() > 0) {
-        orderForm.errors = '';
-        modal.openWithContent(orderForm.render());
-    }
+    modal.openWithContent(orderForm.render());
 });
 
 events.on('contacts:open', () => {
-    contactsForm.errors = '';
     modal.openWithContent(contactsForm.render());
 });
 
-// Изменения полей
+// Обработка пользовательского ввода
 events.on('order:payment:change', (data: { payment: 'card' | 'cash' }) => {
     buyerModel.saveOrderData({ payment: data.payment });
 });
@@ -159,24 +158,30 @@ events.on('contacts:input:change', (data: { email?: string; phone?: string }) =>
     buyerModel.saveOrderData(data);
 });
 
-// Обновление форм после изменения модели
+// Ревьюер: Синхронизация данных после изменения модели.
+// Необходимо заполнить не только ошибки, но и поменять значения полей форм.
 events.on('buyer:data:saved', () => {
     const data = buyerModel.getBuyerData();
-    const errors = buyerModel.validate();
+    const allErrors = buyerModel.validate(); // Ваш новый универсальный метод
 
+    // Синхронизируем значения полей из модели в View
     orderForm.payment = data.payment;
     orderForm.address = data.address;
     contactsForm.email = data.email;
     contactsForm.phone = data.phone;
 
-    orderForm.valid = !errors.payment && !errors.address;
-    orderForm.errors = [errors.payment, errors.address].filter(Boolean).join('; ');
+    // Фильтруем ошибки для формы заказа
+    const orderErrors = [allErrors.payment, allErrors.address].filter(Boolean);
+    orderForm.valid = !allErrors.payment && !allErrors.address;
+    orderForm.errors = orderErrors.join('; ');
 
-    contactsForm.valid = !errors.email && !errors.phone;
-    contactsForm.errors = [errors.email, errors.phone].filter(Boolean).join('; ');
+    // Фильтруем ошибки для формы контактов
+    const contactErrors = [allErrors.email, allErrors.phone].filter(Boolean);
+    contactsForm.valid = !allErrors.email && !allErrors.phone;
+    contactsForm.errors = contactErrors.join('; ');
 });
 
-// Submit
+// Ревьюер: В обработчиках отправки формы не должно производиться валидации данных.
 events.on('order:form:submit', () => {
     events.emit('contacts:open');
 });
@@ -208,10 +213,13 @@ async function submitOrder() {
 events.on('order:success', (response: any) => {
     basketModel.clearBasket();
     buyerModel.clearBuyerData();
+
     successView.price = `Списано ${response?.total || 0} синапсов`;
     modal.openWithContent(successView.render());
 });
 
-events.on('success:close', () => modal.close());
+events.on('success:close', () => {
+    modal.close();
+});
 
 updateUI();

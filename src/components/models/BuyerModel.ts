@@ -39,10 +39,7 @@ export class Buyer {
         this.events.emit('buyer:data:saved');
     }
 
-    /**
-     * Универсальный метод валидации.
-     * Возвращает объект с ошибками. Если ошибок нет — объект будет пустым.
-     */
+
     validate(): TFormErrors {
         const errors: TFormErrors = {};
 
